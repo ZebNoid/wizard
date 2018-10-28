@@ -6,7 +6,8 @@ import {
     Uri,
     WebviewPanel,
     window,
-    workspace
+    workspace,
+    WebviewPanelOnDidChangeViewStateEvent
 } from 'vscode';
 
 export const assetsRoot = "assets";
@@ -36,37 +37,31 @@ export class BasePanel {
         this._panel.onDidDispose(() => this.dispose(), null, this._context.subscriptions);
 
         // Update the content based on view changes
-        this._panel.onDidChangeViewState(e => {
-            //  console.log("onDidChangeViewState");
-            if (this._panel.visible) {
-                this._update();
-            }
-        }, null, this._context.subscriptions);
+        this._panel.onDidChangeViewState(this.viewState, null, this._context.subscriptions);
 
         // Handle messages from the webview
         this._panel.webview.onDidReceiveMessage(this.receiveMessage, null, this._context.subscriptions);
-
         
         // Set the webview's initial html content 
-        this._update();
-        // const timeout = setTimeout(() => {
-        //     // panel.dispose();
-        //     this._update();
-        //     clearTimeout(timeout);
-        //     console.log("timer", timeout);
-        // }, 100);
-    }
-
-    protected destroy() {
-        BasePanel._instance = undefined;
+        // this._update();
+        const timeout = setTimeout(() => {
+            this._update();
+            clearTimeout(timeout);
+        }, 0);
     }
 
     protected static create(panel : WebviewPanel, context : ExtensionContext) : any {
         return new this(panel, context);
     }
 
+    protected destroy() {
+        BasePanel._instance = undefined;
+    }
+
     protected _update() {
         const resource = Uri.file(this.path(`${assetsRoot}/${this.html}`));
+        
+        // console.log(`pre path: ${resource.path}`);
         // .with({ scheme: 'vscode-resource' });
         
         workspace.openTextDocument(resource).then((doc) => {
@@ -85,6 +80,14 @@ export class BasePanel {
         this.destroy();
 
         console.log("onDidDispose");
+    }
+
+    protected viewState(e : WebviewPanelOnDidChangeViewStateEvent) {
+        console.log("viewState", e.webviewPanel.visible);
+        // if (this._panel.visible) {
+        if (e.webviewPanel.visible) {
+            this._update();
+        }
     }
 
     protected receiveMessage(message : any) {
@@ -129,7 +132,7 @@ export class BasePanel {
                 ]
             }
         );
-        this.revive(panel, context);
+        this.create(panel, context);
     }
 
     public static revive(panel : WebviewPanel, context : ExtensionContext) {
