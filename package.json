@@ -4,6 +4,11 @@
     "description": "project wizard",
     "version": "0.0.1",
     "publisher": "XzenD",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ZebNoid/wizard.git"
+    },
     "engines": {
         "vscode": "^1.28.0"
     },
@@ -11,14 +16,22 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.sayHello"
+        "*",
+        "onCommand:wizard.sayHello",
+        "onCommand:wizard.show",
+        "onWebviewPanel:wizardPanel"
     ],
     "main": "./out/extension",
     "contributes": {
         "commands": [
             {
-                "command": "extension.sayHello",
+                "command": "wizard.sayHello",
                 "title": "Hello World"
+            },
+            {
+                "command": "wizard.show",
+                "title": "Show Wizard",
+                "category": "Wizard"
             }
         ]
     },
