@@ -66,9 +66,16 @@ export class BasePanel {
         
         workspace.openTextDocument(resource).then((doc) => {
             console.log(`path: ${resource.path}`);
+            let html = doc.getText();
+            let sysPath = this._context.extensionPath;
+            let mark = "{{root}}";
+            let re = /{{root}}/g;
+            if (html.includes(mark)) {
+                html = html.replace(re, `vscode-resource:${sysPath}/${assetsRoot}`);
+            }
 
             this._panel.title = this.title;
-            this._panel.webview.html = doc.getText();
+            this._panel.webview.html = html;
         }, (err) => {
             console.error(err);
         });
